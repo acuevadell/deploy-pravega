@@ -1,0 +1,147 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  creationTimestamp: "2025-02-14T11:55:39Z"
+  generation: 1
+  labels:
+    app: pravega-cluster
+    component: pravega-segmentstore
+    pravega_cluster: pravega
+  name: pravega-pravega-segment-store
+  namespace: default
+  ownerReferences:
+  - apiVersion: pravega.pravega.io/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: PravegaCluster
+    name: pravega
+    uid: 653e23f5-2750-44f8-bef5-eb2934aa18bb
+  resourceVersion: "104113396"
+  uid: 78583aec-cfd2-4451-9341-97cd0f172186
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: pravega-cluster
+      component: pravega-segmentstore
+      pravega_cluster: pravega
+  serviceName: pravega-segmentstore
+  template:
+    metadata:
+      annotations:
+        pravega.version: 0.13.0
+      creationTimestamp: null
+      labels:
+        app: pravega-cluster
+        component: pravega-segmentstore
+        pravega_cluster: pravega
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                  - pravega-segmentstore
+                - key: pravega_cluster
+                  operator: In
+                  values:
+                  - pravega
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      containers:
+      - args:
+        - segmentstore
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        envFrom:
+        - configMapRef:
+            name: pravega-pravega-segmentstore
+        image: pravega/pravega:0.13.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - curl -s -X GET 'http://localhost:6061/v1/health/liveness' || curl -s
+              -k -X GET 'https://localhost:6061/v1/health/liveness'
+          failureThreshold: 4
+          initialDelaySeconds: 300
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: pravega-segmentstore
+        ports:
+        - containerPort: 12345
+          name: server
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - curl -s -X GET 'http://localhost:6061/v1/health/readiness' || curl -s
+              -k -X GET 'https://localhost:6061/v1/health/readiness'
+          failureThreshold: 30
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4Gi
+          requests:
+            cpu: "1"
+            memory: 4Gi
+        securityContext:
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/dumpfile/heap
+          name: heap-dump
+        - mountPath: /opt/pravega/logs
+          name: logs
+        - mountPath: /mnt/tier2
+          name: tier2
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: heap-dump
+      - emptyDir: {}
+        name: logs
+      - name: tier2
+        persistentVolumeClaim:
+          claimName: pravega-tier2
+  updateStrategy:
+    type: OnDelete
+status:
+  availableReplicas: 1
+  collisionCount: 0
+  currentReplicas: 1
+  currentRevision: pravega-pravega-segment-store-58f756bd4f
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
+  updateRevision: pravega-pravega-segment-store-58f756bd4f
+  updatedReplicas: 1

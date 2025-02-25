@@ -1,560 +1,151 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   creationTimestamp: "2025-02-13T18:20:15Z"
-  generateName: zookeeper-
+  generation: 1
   labels:
     app: zookeeper
-    controller-revision-hash: zookeeper-67589cf785
-    kind: ZookeeperMember
+    owner-rv: "106577830"
     release: zookeeper
-    statefulset.kubernetes.io/pod-name: zookeeper-0
-  name: zookeeper-0
+  name: zookeeper
   namespace: default
   ownerReferences:
-  - apiVersion: apps/v1
+  - apiVersion: zookeeper.pravega.io/v1beta1
     blockOwnerDeletion: true
     controller: true
-    kind: StatefulSet
+    kind: ZookeeperCluster
     name: zookeeper
-    uid: df20b83a-b1c2-43ab-9291-d61fa42251fd
-  resourceVersion: "104108964"
-  uid: 789883c8-19ce-40b1-aa1e-e62dd6d53f1d
+    uid: ce921417-0b1e-4ddb-aabd-acf445da7eb5
+  resourceVersion: "106577905"
+  uid: df20b83a-b1c2-43ab-9291-d61fa42251fd
 spec:
-  affinity:
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-            - key: app
-              operator: In
-              values:
-              - zookeeper
-          topologyKey: kubernetes.io/hostname
-        weight: 20
-  containers:
-  - command:
-    - /usr/local/bin/zookeeperStart.sh
-    env:
-    - name: ENVOY_SIDECAR_STATUS
-      valueFrom:
-        fieldRef:
-          apiVersion: v1
-          fieldPath: metadata.annotations['sidecar.istio.io/status']
-    image: pravega/zookeeper:0.2.15
-    imagePullPolicy: IfNotPresent
-    lifecycle:
-      preStop:
-        exec:
-          command:
-          - zookeeperTeardown.sh
-    livenessProbe:
-      exec:
-        command:
-        - zookeeperLive.sh
-      failureThreshold: 3
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      successThreshold: 1
-      timeoutSeconds: 10
-    name: zookeeper
-    ports:
-    - containerPort: 2181
-      name: client
-      protocol: TCP
-    - containerPort: 2888
-      name: quorum
-      protocol: TCP
-    - containerPort: 3888
-      name: leader-election
-      protocol: TCP
-    - containerPort: 7000
-      name: metrics
-      protocol: TCP
-    - containerPort: 8080
-      name: admin-server
-      protocol: TCP
-    readinessProbe:
-      exec:
-        command:
-        - zookeeperReady.sh
-      failureThreshold: 3
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      successThreshold: 1
-      timeoutSeconds: 10
-    resources: {}
-    terminationMessagePath: /dev/termination-log
-    terminationMessagePolicy: File
-    volumeMounts:
-    - mountPath: /data
-      name: data
-    - mountPath: /conf
-      name: conf
-    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-      name: kube-api-access-4ngcc
-      readOnly: true
-  dnsPolicy: ClusterFirst
-  enableServiceLinks: true
-  hostname: zookeeper-0
-  nodeName: neardata-2204-work01
-  preemptionPolicy: PreemptLowerPriority
-  priority: 0
-  restartPolicy: Always
-  schedulerName: default-scheduler
-  securityContext: {}
-  serviceAccount: zookeeper
-  serviceAccountName: zookeeper
-  subdomain: zookeeper-headless
-  terminationGracePeriodSeconds: 30
-  tolerations:
-  - effect: NoExecute
-    key: node.kubernetes.io/not-ready
-    operator: Exists
-    tolerationSeconds: 300
-  - effect: NoExecute
-    key: node.kubernetes.io/unreachable
-    operator: Exists
-    tolerationSeconds: 300
-  volumes:
-  - name: data
-    persistentVolumeClaim:
-      claimName: data-zookeeper-0
-  - configMap:
-      defaultMode: 420
-      name: zookeeper-configmap
-    name: conf
-  - name: kube-api-access-4ngcc
-    projected:
-      defaultMode: 420
-      sources:
-      - serviceAccountToken:
-          expirationSeconds: 3607
-          path: token
-      - configMap:
-          items:
-          - key: ca.crt
-            path: ca.crt
-          name: kube-root-ca.crt
-      - downwardAPI:
-          items:
-          - fieldRef:
+  podManagementPolicy: OrderedReady
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: zookeeper
+  serviceName: zookeeper-headless
+  template:
+    metadata:
+      creationTimestamp: null
+      generateName: zookeeper
+      labels:
+        app: zookeeper
+        kind: ZookeeperMember
+        release: zookeeper
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - zookeeper
+              topologyKey: kubernetes.io/hostname
+            weight: 20
+      containers:
+      - command:
+        - /usr/local/bin/zookeeperStart.sh
+        env:
+        - name: ENVOY_SIDECAR_STATUS
+          valueFrom:
+            fieldRef:
               apiVersion: v1
-              fieldPath: metadata.namespace
-            path: namespace
-status:
-  conditions:
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-13T18:20:17Z"
-    status: "True"
-    type: Initialized
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:32:35Z"
-    status: "True"
-    type: Ready
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:32:35Z"
-    status: "True"
-    type: ContainersReady
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-13T18:20:17Z"
-    status: "True"
-    type: PodScheduled
-  containerStatuses:
-  - containerID: containerd://ebccfd174e1f639d54065a207010821abc7a68ac055ca506cf65d3c249a2a4db
-    image: docker.io/pravega/zookeeper:0.2.15
-    imageID: docker.io/pravega/zookeeper@sha256:c498ebfb76a66f038075e2fa6148528d74d31ca1664f3257fdf82ee779eec9c8
-    lastState:
-      terminated:
-        containerID: containerd://5d1f23723044ece295b0a0ec3fbb32b89bb60665c1f9147dd0bf57fb4e3235e6
-        exitCode: 137
-        finishedAt: "2025-02-14T11:26:29Z"
-        reason: Error
-        startedAt: "2025-02-14T11:25:20Z"
-    name: zookeeper
-    ready: true
-    restartCount: 282
-    started: true
-    state:
-      running:
-        startedAt: "2025-02-14T11:32:25Z"
-  hostIP: 10.15.2.51
-  phase: Running
-  podIP: 10.244.1.126
-  podIPs:
-  - ip: 10.244.1.126
-  qosClass: BestEffort
-  startTime: "2025-02-13T18:20:17Z"
----
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: "2025-02-14T11:32:35Z"
-  generateName: zookeeper-
-  labels:
-    app: zookeeper
-    controller-revision-hash: zookeeper-67589cf785
-    kind: ZookeeperMember
-    release: zookeeper
-    statefulset.kubernetes.io/pod-name: zookeeper-1
-  name: zookeeper-1
-  namespace: default
-  ownerReferences:
-  - apiVersion: apps/v1
-    blockOwnerDeletion: true
-    controller: true
-    kind: StatefulSet
-    name: zookeeper
-    uid: df20b83a-b1c2-43ab-9291-d61fa42251fd
-  resourceVersion: "104109143"
-  uid: 4f823b29-98bc-420a-9a74-da278a138a69
-spec:
-  affinity:
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-            - key: app
-              operator: In
-              values:
-              - zookeeper
-          topologyKey: kubernetes.io/hostname
-        weight: 20
-  containers:
-  - command:
-    - /usr/local/bin/zookeeperStart.sh
-    env:
-    - name: ENVOY_SIDECAR_STATUS
-      valueFrom:
-        fieldRef:
-          apiVersion: v1
-          fieldPath: metadata.annotations['sidecar.istio.io/status']
-    image: pravega/zookeeper:0.2.15
-    imagePullPolicy: IfNotPresent
-    lifecycle:
-      preStop:
-        exec:
-          command:
-          - zookeeperTeardown.sh
-    livenessProbe:
-      exec:
-        command:
-        - zookeeperLive.sh
-      failureThreshold: 3
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      successThreshold: 1
-      timeoutSeconds: 10
-    name: zookeeper
-    ports:
-    - containerPort: 2181
-      name: client
-      protocol: TCP
-    - containerPort: 2888
-      name: quorum
-      protocol: TCP
-    - containerPort: 3888
-      name: leader-election
-      protocol: TCP
-    - containerPort: 7000
-      name: metrics
-      protocol: TCP
-    - containerPort: 8080
-      name: admin-server
-      protocol: TCP
-    readinessProbe:
-      exec:
-        command:
-        - zookeeperReady.sh
-      failureThreshold: 3
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      successThreshold: 1
-      timeoutSeconds: 10
-    resources: {}
-    terminationMessagePath: /dev/termination-log
-    terminationMessagePolicy: File
-    volumeMounts:
-    - mountPath: /data
-      name: data
-    - mountPath: /conf
-      name: conf
-    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-      name: kube-api-access-wdbkp
-      readOnly: true
-  dnsPolicy: ClusterFirst
-  enableServiceLinks: true
-  hostname: zookeeper-1
-  nodeName: neardata-2204-work03
-  preemptionPolicy: PreemptLowerPriority
-  priority: 0
-  restartPolicy: Always
-  schedulerName: default-scheduler
-  securityContext: {}
-  serviceAccount: zookeeper
-  serviceAccountName: zookeeper
-  subdomain: zookeeper-headless
-  terminationGracePeriodSeconds: 30
-  tolerations:
-  - effect: NoExecute
-    key: node.kubernetes.io/not-ready
-    operator: Exists
-    tolerationSeconds: 300
-  - effect: NoExecute
-    key: node.kubernetes.io/unreachable
-    operator: Exists
-    tolerationSeconds: 300
-  volumes:
-  - name: data
-    persistentVolumeClaim:
-      claimName: data-zookeeper-1
-  - configMap:
-      defaultMode: 420
-      name: zookeeper-configmap
-    name: conf
-  - name: kube-api-access-wdbkp
-    projected:
-      defaultMode: 420
-      sources:
-      - serviceAccountToken:
-          expirationSeconds: 3607
-          path: token
+              fieldPath: metadata.annotations['sidecar.istio.io/status']
+        image: pravega/zookeeper:0.2.15
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - zookeeperTeardown.sh
+        livenessProbe:
+          exec:
+            command:
+            - zookeeperLive.sh
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 10
+        name: zookeeper
+        ports:
+        - containerPort: 2181
+          name: client
+          protocol: TCP
+        - containerPort: 2888
+          name: quorum
+          protocol: TCP
+        - containerPort: 3888
+          name: leader-election
+          protocol: TCP
+        - containerPort: 7000
+          name: metrics
+          protocol: TCP
+        - containerPort: 8080
+          name: admin-server
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - zookeeperReady.sh
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 10
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /data
+          name: data
+        - mountPath: /conf
+          name: conf
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: zookeeper
+      serviceAccountName: zookeeper
+      terminationGracePeriodSeconds: 30
+      volumes:
       - configMap:
-          items:
-          - key: ca.crt
-            path: ca.crt
-          name: kube-root-ca.crt
-      - downwardAPI:
-          items:
-          - fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-            path: namespace
-status:
-  conditions:
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:32:37Z"
-    status: "True"
-    type: Initialized
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:33:19Z"
-    status: "True"
-    type: Ready
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:33:19Z"
-    status: "True"
-    type: ContainersReady
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:32:37Z"
-    status: "True"
-    type: PodScheduled
-  containerStatuses:
-  - containerID: containerd://17f41c942c553560f9000feb1f7eb469941f534f2a518b85fa58d9d9d71887a3
-    image: docker.io/pravega/zookeeper:0.2.15
-    imageID: docker.io/pravega/zookeeper@sha256:c498ebfb76a66f038075e2fa6148528d74d31ca1664f3257fdf82ee779eec9c8
-    lastState:
-      terminated:
-        containerID: containerd://114abc2a6a8f45b063340611fc4fbcebd37989feaf561d851bf44d7832eb423f
-        exitCode: 1
-        finishedAt: "2025-02-14T11:32:38Z"
-        reason: Error
-        startedAt: "2025-02-14T11:32:38Z"
-    name: zookeeper
-    ready: true
-    restartCount: 2
-    started: true
-    state:
-      running:
-        startedAt: "2025-02-14T11:33:02Z"
-  hostIP: 10.15.2.53
-  phase: Running
-  podIP: 10.244.2.220
-  podIPs:
-  - ip: 10.244.2.220
-  qosClass: BestEffort
-  startTime: "2025-02-14T11:32:37Z"
----
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: "2025-02-14T11:33:19Z"
-  generateName: zookeeper-
-  labels:
-    app: zookeeper
-    controller-revision-hash: zookeeper-67589cf785
-    kind: ZookeeperMember
-    release: zookeeper
-    statefulset.kubernetes.io/pod-name: zookeeper-2
-  name: zookeeper-2
-  namespace: default
-  ownerReferences:
-  - apiVersion: apps/v1
-    blockOwnerDeletion: true
-    controller: true
-    kind: StatefulSet
-    name: zookeeper
-    uid: df20b83a-b1c2-43ab-9291-d61fa42251fd
-  resourceVersion: "104109244"
-  uid: f656435c-eb7d-40eb-948b-bd07d6c45040
-spec:
-  affinity:
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-            - key: app
-              operator: In
-              values:
-              - zookeeper
-          topologyKey: kubernetes.io/hostname
-        weight: 20
-  containers:
-  - command:
-    - /usr/local/bin/zookeeperStart.sh
-    env:
-    - name: ENVOY_SIDECAR_STATUS
-      valueFrom:
-        fieldRef:
-          apiVersion: v1
-          fieldPath: metadata.annotations['sidecar.istio.io/status']
-    image: pravega/zookeeper:0.2.15
-    imagePullPolicy: IfNotPresent
-    lifecycle:
-      preStop:
-        exec:
-          command:
-          - zookeeperTeardown.sh
-    livenessProbe:
-      exec:
-        command:
-        - zookeeperLive.sh
-      failureThreshold: 3
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      successThreshold: 1
-      timeoutSeconds: 10
-    name: zookeeper
-    ports:
-    - containerPort: 2181
-      name: client
-      protocol: TCP
-    - containerPort: 2888
-      name: quorum
-      protocol: TCP
-    - containerPort: 3888
-      name: leader-election
-      protocol: TCP
-    - containerPort: 7000
-      name: metrics
-      protocol: TCP
-    - containerPort: 8080
-      name: admin-server
-      protocol: TCP
-    readinessProbe:
-      exec:
-        command:
-        - zookeeperReady.sh
-      failureThreshold: 3
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      successThreshold: 1
-      timeoutSeconds: 10
-    resources: {}
-    terminationMessagePath: /dev/termination-log
-    terminationMessagePolicy: File
-    volumeMounts:
-    - mountPath: /data
+          defaultMode: 420
+          name: zookeeper-configmap
+        name: conf
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: zookeeper
+        release: zookeeper
+        uid: ce921417-0b1e-4ddb-aabd-acf445da7eb5
       name: data
-    - mountPath: /conf
-      name: conf
-    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-      name: kube-api-access-j5v92
-      readOnly: true
-  dnsPolicy: ClusterFirst
-  enableServiceLinks: true
-  hostname: zookeeper-2
-  nodeName: neardata-2204-work02
-  preemptionPolicy: PreemptLowerPriority
-  priority: 0
-  restartPolicy: Always
-  schedulerName: default-scheduler
-  securityContext: {}
-  serviceAccount: zookeeper
-  serviceAccountName: zookeeper
-  subdomain: zookeeper-headless
-  terminationGracePeriodSeconds: 30
-  tolerations:
-  - effect: NoExecute
-    key: node.kubernetes.io/not-ready
-    operator: Exists
-    tolerationSeconds: 300
-  - effect: NoExecute
-    key: node.kubernetes.io/unreachable
-    operator: Exists
-    tolerationSeconds: 300
-  volumes:
-  - name: data
-    persistentVolumeClaim:
-      claimName: data-zookeeper-2
-  - configMap:
-      defaultMode: 420
-      name: zookeeper-configmap
-    name: conf
-  - name: kube-api-access-j5v92
-    projected:
-      defaultMode: 420
-      sources:
-      - serviceAccountToken:
-          expirationSeconds: 3607
-          path: token
-      - configMap:
-          items:
-          - key: ca.crt
-            path: ca.crt
-          name: kube-root-ca.crt
-      - downwardAPI:
-          items:
-          - fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-            path: namespace
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      volumeMode: Filesystem
+    status:
+      phase: Pending
 status:
-  conditions:
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:33:21Z"
-    status: "True"
-    type: Initialized
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:33:44Z"
-    status: "True"
-    type: Ready
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:33:44Z"
-    status: "True"
-    type: ContainersReady
-  - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:33:21Z"
-    status: "True"
-    type: PodScheduled
-  containerStatuses:
-  - containerID: containerd://ca4c6ac1485109edf5db4b1ed1bf75bcb47446797eab02265dbe877280341135
-    image: docker.io/pravega/zookeeper:0.2.15
-    imageID: docker.io/pravega/zookeeper@sha256:c498ebfb76a66f038075e2fa6148528d74d31ca1664f3257fdf82ee779eec9c8
-    lastState: {}
-    name: zookeeper
-    ready: true
-    restartCount: 0
-    started: true
-    state:
-      running:
-        startedAt: "2025-02-14T11:33:22Z"
-  hostIP: 10.15.2.52
-  phase: Running
-  podIP: 10.244.3.78
-  podIPs:
-  - ip: 10.244.3.78
-  qosClass: BestEffort
-  startTime: "2025-02-14T11:33:21Z"
+  availableReplicas: 3
+  collisionCount: 0
+  currentReplicas: 3
+  currentRevision: zookeeper-67589cf785
+  observedGeneration: 1
+  readyReplicas: 3
+  replicas: 3
+  updateRevision: zookeeper-67589cf785
+  updatedReplicas: 3

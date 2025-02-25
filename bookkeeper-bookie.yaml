@@ -1,0 +1,223 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    bookkeeper.version: 0.13.0
+  creationTimestamp: "2025-02-14T11:50:50Z"
+  generation: 1
+  labels:
+    app: bookkeeper-cluster
+    bookkeeper_cluster: bookkeeper
+    component: bookie
+  name: bookkeeper-bookie
+  namespace: default
+  ownerReferences:
+  - apiVersion: bookkeeper.pravega.io/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: BookkeeperCluster
+    name: bookkeeper
+    uid: be8e8e3a-2784-4274-b246-d047df06c51a
+  resourceVersion: "104149770"
+  uid: 749ab4e7-96f5-4eca-9601-c535ed6c40c9
+spec:
+  podManagementPolicy: Parallel
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: bookkeeper-cluster
+      bookkeeper_cluster: bookkeeper
+      component: bookie
+  serviceName: bookkeeper-bookie-headless
+  template:
+    metadata:
+      annotations:
+        bookkeeper.version: 0.13.0
+      creationTimestamp: null
+      labels:
+        app: bookkeeper-cluster
+        bookkeeper_cluster: bookkeeper
+        component: bookie
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                  - bookie
+                - key: bookkeeper_cluster
+                  operator: In
+                  values:
+                  - bookkeeper
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: bookkeeper-bookie
+        - configMapRef:
+            name: bookkeeper-configmap
+        image: pravega/bookkeeper:0.13.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - netstat -ltn 2> /dev/null | grep 3181 || ss -ltn 2> /dev/null | grep
+              3181
+          failureThreshold: 4
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: bookie
+        ports:
+        - containerPort: 3181
+          name: bookie
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - /opt/bookkeeper/bin/bookkeeper shell bookiesanity
+          failureThreshold: 9
+          initialDelaySeconds: 20
+          periodSeconds: 20
+          successThreshold: 1
+          timeoutSeconds: 10
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4Gi
+          requests:
+            cpu: "1"
+            memory: 4Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /bk/ledgers/l0
+          name: ledger
+          subPath: ledger0
+        - mountPath: /bk/ledgers/l1
+          name: ledger
+          subPath: ledger1
+        - mountPath: /bk/ledgers/l2
+          name: ledger
+          subPath: ledger2
+        - mountPath: /bk/ledgers/l3
+          name: ledger
+          subPath: ledger3
+        - mountPath: /bk/journal/j0
+          name: journal
+          subPath: journal0
+        - mountPath: /bk/journal/j1
+          name: journal
+          subPath: journal1
+        - mountPath: /bk/journal/j2
+          name: journal
+          subPath: journal2
+        - mountPath: /bk/journal/j3
+          name: journal
+          subPath: journal3
+        - mountPath: /bk/index
+          name: index
+        - mountPath: /tmp/dumpfile/heap
+          name: heap-dump
+        - mountPath: /opt/bookkeeper/logs
+          name: logs
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: heap-dump
+      - emptyDir: {}
+        name: logs
+  updateStrategy:
+    type: OnDelete
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      name: journal
+      namespace: default
+      ownerReferences:
+      - apiVersion: bookkeeper.pravega.io/v1alpha1
+        blockOwnerDeletion: true
+        controller: true
+        kind: BookkeeperCluster
+        name: bookkeeper
+        uid: be8e8e3a-2784-4274-b246-d047df06c51a
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      volumeMode: Filesystem
+    status:
+      phase: Pending
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      name: ledger
+      namespace: default
+      ownerReferences:
+      - apiVersion: bookkeeper.pravega.io/v1alpha1
+        blockOwnerDeletion: true
+        controller: true
+        kind: BookkeeperCluster
+        name: bookkeeper
+        uid: be8e8e3a-2784-4274-b246-d047df06c51a
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      volumeMode: Filesystem
+    status:
+      phase: Pending
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      name: index
+      namespace: default
+      ownerReferences:
+      - apiVersion: bookkeeper.pravega.io/v1alpha1
+        blockOwnerDeletion: true
+        controller: true
+        kind: BookkeeperCluster
+        name: bookkeeper
+        uid: be8e8e3a-2784-4274-b246-d047df06c51a
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      volumeMode: Filesystem
+    status:
+      phase: Pending
+status:
+  availableReplicas: 3
+  collisionCount: 0
+  currentReplicas: 3
+  currentRevision: bookkeeper-bookie-d7dbf458d
+  observedGeneration: 1
+  readyReplicas: 3
+  replicas: 3
+  updateRevision: bookkeeper-bookie-d7dbf458d
+  updatedReplicas: 3
