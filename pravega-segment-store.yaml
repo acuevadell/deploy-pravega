@@ -145,3 +145,39 @@ status:
   replicas: 1
   updateRevision: pravega-pravega-segment-store-58f756bd4f
   updatedReplicas: 1
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  creationTimestamp: "2025-02-14T11:55:39Z"
+  generation: 1
+  name: pravega-segmentstore
+  namespace: default
+  ownerReferences:
+  - apiVersion: pravega.pravega.io/v1beta1
+    blockOwnerDeletion: true
+    controller: true
+    kind: PravegaCluster
+    name: pravega
+    uid: 653e23f5-2750-44f8-bef5-eb2934aa18bb
+  resourceVersion: "104113393"
+  uid: 44b95034-eec7-4a46-9143-7363d0494a43
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: pravega-cluster
+      component: pravega-segmentstore
+      pravega_cluster: pravega
+status:
+  conditions:
+  - lastTransitionTime: "2025-02-14T11:55:50Z"
+    message: ""
+    observedGeneration: 1
+    reason: InsufficientPods
+    status: "False"
+    type: DisruptionAllowed
+  currentHealthy: 1
+  desiredHealthy: 1
+  disruptionsAllowed: 0
+  expectedPods: 1
+  observedGeneration: 1

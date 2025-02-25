@@ -262,3 +262,39 @@ spec:
   type: ClusterIP
 status:
   loadBalancer: {}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  creationTimestamp: "2025-02-14T11:50:50Z"
+  generation: 1
+  name: bookkeeper-bookie
+  namespace: default
+  ownerReferences:
+  - apiVersion: bookkeeper.pravega.io/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: BookkeeperCluster
+    name: bookkeeper
+    uid: be8e8e3a-2784-4274-b246-d047df06c51a
+  resourceVersion: "104149769"
+  uid: f56b36ac-21b8-4db4-95a5-62da9b05e6a9
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: bookkeeper-cluster
+      bookkeeper_cluster: bookkeeper
+      component: bookie
+status:
+  conditions:
+  - lastTransitionTime: "2025-02-14T15:51:16Z"
+    message: ""
+    observedGeneration: 1
+    reason: SufficientPods
+    status: "True"
+    type: DisruptionAllowed
+  currentHealthy: 3
+  desiredHealthy: 2
+  disruptionsAllowed: 1
+  expectedPods: 3
+  observedGeneration: 1
