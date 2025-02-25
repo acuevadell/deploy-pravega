@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  creationTimestamp: "2025-02-14T11:33:19Z"
+  creationTimestamp: "2025-02-13T18:20:15Z"
   generateName: zookeeper-
   labels:
     app: zookeeper
     controller-revision-hash: zookeeper-67589cf785
     kind: ZookeeperMember
     release: zookeeper
-    statefulset.kubernetes.io/pod-name: zookeeper-2
-  name: zookeeper-2
+    statefulset.kubernetes.io/pod-name: zookeeper-0
+  name: zookeeper-0
   namespace: default
   ownerReferences:
   - apiVersion: apps/v1
@@ -18,8 +18,8 @@ metadata:
     kind: StatefulSet
     name: zookeeper
     uid: df20b83a-b1c2-43ab-9291-d61fa42251fd
-  resourceVersion: "104109244"
-  uid: f656435c-eb7d-40eb-948b-bd07d6c45040
+  resourceVersion: "104108964"
+  uid: 789883c8-19ce-40b1-aa1e-e62dd6d53f1d
 spec:
   affinity:
     podAntiAffinity:
@@ -93,12 +93,12 @@ spec:
     - mountPath: /conf
       name: conf
     - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-      name: kube-api-access-j5v92
+      name: kube-api-access-4ngcc
       readOnly: true
   dnsPolicy: ClusterFirst
   enableServiceLinks: true
-  hostname: zookeeper-2
-  nodeName: neardata-2204-work02
+  hostname: zookeeper-0
+  nodeName: neardata-2204-work01
   preemptionPolicy: PreemptLowerPriority
   priority: 0
   restartPolicy: Always
@@ -120,12 +120,12 @@ spec:
   volumes:
   - name: data
     persistentVolumeClaim:
-      claimName: data-zookeeper-2
+      claimName: data-zookeeper-0
   - configMap:
       defaultMode: 420
       name: zookeeper-configmap
     name: conf
-  - name: kube-api-access-j5v92
+  - name: kube-api-access-4ngcc
     projected:
       defaultMode: 420
       sources:
@@ -146,37 +146,45 @@ spec:
 status:
   conditions:
   - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:33:21Z"
+    lastTransitionTime: "2025-02-13T18:20:17Z"
     status: "True"
     type: Initialized
   - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:33:44Z"
+    lastTransitionTime: "2025-02-14T11:32:35Z"
     status: "True"
     type: Ready
   - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:33:44Z"
+    lastTransitionTime: "2025-02-14T11:32:35Z"
     status: "True"
     type: ContainersReady
   - lastProbeTime: null
-    lastTransitionTime: "2025-02-14T11:33:21Z"
+    lastTransitionTime: "2025-02-13T18:20:17Z"
     status: "True"
     type: PodScheduled
   containerStatuses:
-  - containerID: containerd://ca4c6ac1485109edf5db4b1ed1bf75bcb47446797eab02265dbe877280341135
+  - containerID: containerd://ebccfd174e1f639d54065a207010821abc7a68ac055ca506cf65d3c249a2a4db
     image: docker.io/pravega/zookeeper:0.2.15
     imageID: docker.io/pravega/zookeeper@sha256:c498ebfb76a66f038075e2fa6148528d74d31ca1664f3257fdf82ee779eec9c8
-    lastState: {}
+    lastState:
+      terminated:
+        containerID: containerd://5d1f23723044ece295b0a0ec3fbb32b89bb60665c1f9147dd0bf57fb4e3235e6
+        exitCode: 137
+        finishedAt: "2025-02-14T11:26:29Z"
+        reason: Error
+        startedAt: "2025-02-14T11:25:20Z"
     name: zookeeper
     ready: true
-    restartCount: 0
+    restartCount: 282
     started: true
     state:
       running:
-        startedAt: "2025-02-14T11:33:22Z"
-  hostIP: 10.15.2.52
+        startedAt: "2025-02-14T11:32:25Z"
+  hostIP: 10.15.2.51
   phase: Running
-  podIP: 10.244.3.78
+  podIP: 10.244.1.126
   podIPs:
-  - ip: 10.244.3.78
+  - ip: 10.244.1.126
   qosClass: BestEffort
-  startTime: "2025-02-14T11:33:21Z"
+  startTime: "2025-02-13T18:20:17Z"
+---
+---
