@@ -35,6 +35,17 @@ spec:
   selector:
     app: zookeeper
 ---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: zookeeper
+  namespace: neardata
+spec:
+  selector:
+    matchLabels:
+      app: zookeeper
+  maxUnavailable: 1
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -151,41 +162,3 @@ spec:
         requests:
           storage: 20Gi
       volumeMode: Filesystem
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  creationTimestamp: "2025-02-13T18:20:15Z"
-  generation: 1
-  labels:
-    app: zookeeper
-    owner-rv: "103954608"
-    release: zookeeper
-  name: zookeeper
-  namespace: default
-  ownerReferences:
-  - apiVersion: zookeeper.pravega.io/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: ZookeeperCluster
-    name: zookeeper
-    uid: ce921417-0b1e-4ddb-aabd-acf445da7eb5
-  resourceVersion: "104109252"
-  uid: 0b87c569-0e57-4626-b93b-48a040bec557
-spec:
-  maxUnavailable: 1
-  selector:
-    matchLabels:
-      app: zookeeper
-status:
-  conditions:
-  - lastTransitionTime: "2025-02-14T11:33:44Z"
-    message: ""
-    observedGeneration: 1
-    reason: SufficientPods
-    status: "True"
-    type: DisruptionAllowed
-  currentHealthy: 3
-  desiredHealthy: 2
-  disruptionsAllowed: 1
-  expectedPods: 3
-  observedGeneration: 1

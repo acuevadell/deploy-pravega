@@ -1,3 +1,68 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2025-02-14T11:50:50Z"
+  labels:
+    app: bookkeeper-cluster
+    bookkeeper_cluster: bookkeeper
+    component: bookie
+  name: bookkeeper-bookie-headless
+  namespace: default
+  ownerReferences:
+  - apiVersion: bookkeeper.pravega.io/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: BookkeeperCluster
+    name: bookkeeper
+    uid: be8e8e3a-2784-4274-b246-d047df06c51a
+  resourceVersion: "104112205"
+  uid: 7447eb13-34e8-49f1-8192-b4ac398c0552
+spec:
+  clusterIP: None
+  clusterIPs:
+  - None
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: bookie
+    port: 3181
+    protocol: TCP
+    targetPort: 3181
+  selector:
+    app: bookkeeper-cluster
+    bookkeeper_cluster: bookkeeper
+    component: bookie
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  creationTimestamp: "2025-02-14T11:50:50Z"
+  generation: 1
+  name: bookkeeper-bookie
+  namespace: default
+  ownerReferences:
+  - apiVersion: bookkeeper.pravega.io/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: BookkeeperCluster
+    name: bookkeeper
+    uid: be8e8e3a-2784-4274-b246-d047df06c51a
+  resourceVersion: "104149769"
+  uid: f56b36ac-21b8-4db4-95a5-62da9b05e6a9
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: bookkeeper-cluster
+      bookkeeper_cluster: bookkeeper
+      component: bookie
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -209,92 +274,3 @@ spec:
         requests:
           storage: 10Gi
       volumeMode: Filesystem
-    status:
-      phase: Pending
-status:
-  availableReplicas: 3
-  collisionCount: 0
-  currentReplicas: 3
-  currentRevision: bookkeeper-bookie-d7dbf458d
-  observedGeneration: 1
-  readyReplicas: 3
-  replicas: 3
-  updateRevision: bookkeeper-bookie-d7dbf458d
-  updatedReplicas: 3
----
-apiVersion: v1
-kind: Service
-metadata:
-  creationTimestamp: "2025-02-14T11:50:50Z"
-  labels:
-    app: bookkeeper-cluster
-    bookkeeper_cluster: bookkeeper
-    component: bookie
-  name: bookkeeper-bookie-headless
-  namespace: default
-  ownerReferences:
-  - apiVersion: bookkeeper.pravega.io/v1alpha1
-    blockOwnerDeletion: true
-    controller: true
-    kind: BookkeeperCluster
-    name: bookkeeper
-    uid: be8e8e3a-2784-4274-b246-d047df06c51a
-  resourceVersion: "104112205"
-  uid: 7447eb13-34e8-49f1-8192-b4ac398c0552
-spec:
-  clusterIP: None
-  clusterIPs:
-  - None
-  internalTrafficPolicy: Cluster
-  ipFamilies:
-  - IPv4
-  ipFamilyPolicy: SingleStack
-  ports:
-  - name: bookie
-    port: 3181
-    protocol: TCP
-    targetPort: 3181
-  selector:
-    app: bookkeeper-cluster
-    bookkeeper_cluster: bookkeeper
-    component: bookie
-  sessionAffinity: None
-  type: ClusterIP
-status:
-  loadBalancer: {}
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  creationTimestamp: "2025-02-14T11:50:50Z"
-  generation: 1
-  name: bookkeeper-bookie
-  namespace: default
-  ownerReferences:
-  - apiVersion: bookkeeper.pravega.io/v1alpha1
-    blockOwnerDeletion: true
-    controller: true
-    kind: BookkeeperCluster
-    name: bookkeeper
-    uid: be8e8e3a-2784-4274-b246-d047df06c51a
-  resourceVersion: "104149769"
-  uid: f56b36ac-21b8-4db4-95a5-62da9b05e6a9
-spec:
-  maxUnavailable: 1
-  selector:
-    matchLabels:
-      app: bookkeeper-cluster
-      bookkeeper_cluster: bookkeeper
-      component: bookie
-status:
-  conditions:
-  - lastTransitionTime: "2025-02-14T15:51:16Z"
-    message: ""
-    observedGeneration: 1
-    reason: SufficientPods
-    status: "True"
-    type: DisruptionAllowed
-  currentHealthy: 3
-  desiredHealthy: 2
-  disruptionsAllowed: 1
-  expectedPods: 3
-  observedGeneration: 1
