@@ -1,23 +1,8 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  creationTimestamp: "2025-02-13T18:20:15Z"
-  generation: 1
-  labels:
-    app: zookeeper
-    owner-rv: "106577830"
-    release: zookeeper
   name: zookeeper
-  namespace: default
-  ownerReferences:
-  - apiVersion: zookeeper.pravega.io/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: ZookeeperCluster
-    name: zookeeper
-    uid: ce921417-0b1e-4ddb-aabd-acf445da7eb5
-  resourceVersion: "106577905"
-  uid: df20b83a-b1c2-43ab-9291-d61fa42251fd
+  namespace: neardata
 spec:
   podManagementPolicy: OrderedReady
   replicas: 3
@@ -28,12 +13,8 @@ spec:
   serviceName: zookeeper-headless
   template:
     metadata:
-      creationTimestamp: null
-      generateName: zookeeper
       labels:
         app: zookeeper
-        kind: ZookeeperMember
-        release: zookeeper
     spec:
       affinity:
         podAntiAffinity:
@@ -46,7 +27,6 @@ spec:
                   values:
                   - zookeeper
               topologyKey: kubernetes.io/hostname
-            weight: 20
       containers:
       - command:
         - /usr/local/bin/zookeeperStart.sh
@@ -99,8 +79,6 @@ spec:
           successThreshold: 1
           timeoutSeconds: 10
         resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /data
           name: data
@@ -128,7 +106,6 @@ spec:
       labels:
         app: zookeeper
         release: zookeeper
-        uid: ce921417-0b1e-4ddb-aabd-acf445da7eb5
       name: data
     spec:
       accessModes:
@@ -137,15 +114,3 @@ spec:
         requests:
           storage: 20Gi
       volumeMode: Filesystem
-    status:
-      phase: Pending
-status:
-  availableReplicas: 3
-  collisionCount: 0
-  currentReplicas: 3
-  currentRevision: zookeeper-67589cf785
-  observedGeneration: 1
-  readyReplicas: 3
-  replicas: 3
-  updateRevision: zookeeper-67589cf785
-  updatedReplicas: 3
