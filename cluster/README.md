@@ -21,7 +21,7 @@ sudo chmod 777 /var/tier2
 ```
 tar xfvz apache-zookeeper-3.6.1-bin.tar.gz
 mv apache-zookeeper-3.6.1-bin zookeeper
-cp zoo.cfg ./zookeeper/conf/zoo.cfg
+cp zookeeper.conf ./zookeeper/conf/zoo.cfg
 ./zookeeper/bin/zkServer.sh start
 ./zookeeper/bin/zkCli.sh -server localhost:2181 create /pravega
 ./zookeeper/bin/zkCli.sh -server localhost:2181 create /pravega/bookkeeper
@@ -32,7 +32,7 @@ cp zoo.cfg ./zookeeper/conf/zoo.cfg
 ```
 tar xfvz bookkeeper-server-4.11.1-bin.tar.gz
 mv bookkeeper-server-4.11.1 bookkeeper
-cp bk_server.conf bookkeeper/conf/bk_server.conf
+cp bookkeeper.conf bookkeeper/conf/bk_server.conf
 sudo mkdir /bk/
 sudo chmod 777 /bk/
 ./bookkeeper/bin/bookkeeper shell metaformat -nonInteractive
@@ -44,14 +44,14 @@ sudo chmod 777 /bk/
 ```
 tar xfvz pravega-0.13.0.tgz
 mv pravega-0.13.0 pravega
-cp controller.config.properties pravega/conf/controller.config.properties
+cp pravega-controller.conf pravega/conf/controller.config.properties
 ./pravega/bin/pravega-controller
 ```
 
 # Segment Store
 
 ```
-cp config.properties pravega/conf/config.properties
+cp segment-store.conf pravega/conf/config.properties
 pravega/bin/pravega-segmentstore
 ```
 
