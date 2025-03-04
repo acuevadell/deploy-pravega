@@ -39,19 +39,21 @@ sudo chmod 777 /bk/
 ./bookkeeper/bin/bookkeeper bookie
 ```
 
-## Pravega
+# Segment Store
 
 ```
 tar xfvz pravega-0.13.0.tgz
 mv pravega-0.13.0 pravega
+cp segment-store.conf pravega/conf/config.properties
+pravega/bin/pravega-segmentstore
+```
+
+## Pravega
+
+```
 cp pravega-controller.conf pravega/conf/controller.config.properties
 ./pravega/bin/pravega-controller
 ```
 
-# Segment Store
 
-```
-cp segment-store.conf pravega/conf/config.properties
-pravega/bin/pravega-segmentstore
-```
 
